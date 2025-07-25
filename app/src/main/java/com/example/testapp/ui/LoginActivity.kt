@@ -36,6 +36,19 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.login.setOnClickListener {
+            if (
+                binding.textInputEditText.text.isNullOrEmpty() ||
+                !isValidEmail(binding.textInputEditText.text.toString())
+            ) {
+                binding.textInputEditText.error = "Invalid input!"
+                return@setOnClickListener
+            }
+
+            if (binding.textInputEditText2.text.isNullOrEmpty()) {
+                binding.textInputEditText2.error = "Invalid input!"
+                return@setOnClickListener
+            }
+
             val api = RetrofitProvider
                 .createRetrofit(TokenProviderImpl(this))
                 .create(AuthApi::class.java)
@@ -74,5 +87,10 @@ class LoginActivity : AppCompatActivity() {
                TokenProviderImpl(this@LoginActivity).clearTokens()
            }
         }
+    }
+
+    fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
+        return emailRegex.matches(email)
     }
 }

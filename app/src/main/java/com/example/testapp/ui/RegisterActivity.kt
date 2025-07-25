@@ -34,6 +34,25 @@ class RegisterActivity : AppCompatActivity() {
 
 
         binding.create.setOnClickListener {
+
+            if (binding.textInputEditText.text.isNullOrEmpty()) {
+                binding.textInputEditText.error = "Invalid input!"
+                return@setOnClickListener
+            }
+
+            if (
+                binding.textInputEditText2.text.isNullOrEmpty() ||
+                !isValidEmail(binding.textInputEditText2.text.toString())
+            ) {
+                binding.textInputEditText2.error = "Invalid input!"
+                return@setOnClickListener
+            }
+
+            if (binding.textInputEditText3.text.isNullOrEmpty()) {
+                binding.textInputEditText3.error = "Invalid input!"
+                return@setOnClickListener
+            }
+
             val api = RetrofitProvider
                 .createRetrofit(TokenProviderImpl(this))
                 .create(UserApi::class.java)
@@ -61,5 +80,10 @@ class RegisterActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
+        return emailRegex.matches(email)
     }
 }
