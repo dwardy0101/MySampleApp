@@ -2,15 +2,16 @@ package com.example.testapp.ui
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.testapp.Network
-import com.example.testapp.R
-import com.example.testapp.data.UserApi
-import com.example.testapp.data.UserData
+import com.example.testapp.data.RetrofitProvider
+import com.example.testapp.data.api.UserApi
+import com.example.testapp.data.model.CreateUserData
+import com.example.testapp.data.persistent.TokenProviderImpl
 import com.example.testapp.databinding.ActivityRegisterBinding
 import kotlinx.coroutines.launch
 
@@ -25,7 +26,7 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.main)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(binding.main.id)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -33,18 +34,31 @@ class RegisterActivity : AppCompatActivity() {
 
 
         binding.create.setOnClickListener {
-            val api = Network.createService(UserApi::class.java)
+            val api = RetrofitProvider
+                .createRetrofit(TokenProviderImpl(this))
+                .create(UserApi::class.java)
 
-            val input = UserData(
+            val input = CreateUserData(
                 binding.textInputEditText.text.toString(),
                 binding.textInputEditText2.text.toString(),
                 binding.textInputEditText3.text.toString()
             )
 
             lifecycleScope.launch {
-                val response = api.createUser(input)
+               try {
+                   val response = api.createUser(input)
+                   Log.d("MYTEST", "$response")
 
-                Log.d("MYTEST", "$response")
+                   if (response.isJsonNull) {
+                       Toast.makeText(this@RegisterActivity, "Registration Failed!", Toast.LENGTH_LONG).show()
+                   } else {
+                       Toast.makeText(this@RegisterActivity, "Registration Successful!", Toast.LENGTH_LONG).show()
+                       finish()
+                   }
+               } catch (e: Exception) {
+                   e.printStackTrace()
+               }
+
             }
         }
     }

@@ -1,8 +1,8 @@
-package com.example.testapp.data
+package com.example.testapp.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class UserData(
+data class CreateUserData(
     @SerializedName("name")
     private val name: String,
     @SerializedName("email")

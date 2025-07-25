@@ -3,7 +3,7 @@ package com.example.testapp
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class AuthInterceptor : Interceptor {
+class AuthInterceptor2 : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
 
 //        val credentials = "fdc_user:admin123"

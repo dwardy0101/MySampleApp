@@ -24,7 +24,7 @@ object Network {
     fun <T> createService(serviceClass: Class<T>): T {
         if (!httpClient.interceptors().contains(logging)) {
             httpClient.addInterceptor(logging)
-            httpClient.addInterceptor(AuthInterceptor())
+            httpClient.addInterceptor(AuthInterceptor2())
             builder.client(httpClient.build())
             retrofit = builder.build()
         }
