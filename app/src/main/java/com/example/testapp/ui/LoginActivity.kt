@@ -37,53 +37,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.login.setOnClickListener {
-            if (
-                binding.textInputEditText.text.isNullOrEmpty() ||
-                !isValidEmail(binding.textInputEditText.text.toString())
-            ) {
-                binding.textInputEditText.error = "Invalid input!"
-                return@setOnClickListener
-            }
-
-            if (binding.textInputEditText2.text.isNullOrEmpty()) {
-                binding.textInputEditText2.error = "Invalid input!"
-                return@setOnClickListener
-            }
-
-            val api = RetrofitProvider
-                .createRetrofit(TokenProviderImpl(this))
-                .create(AuthApi::class.java)
-
-            val input = LoginUserData(
-                binding.textInputEditText.text.toString(),
-                binding.textInputEditText2.text.toString()
-            )
-
-            lifecycleScope.launch {
-                try {
-                    val result = api.login(input)
-
-                    Log.d("MYTEST", "$result")
-
-                    TokenProviderImpl(this@LoginActivity).apply {
-                        saveAccessToken(result["access_token"].toString())
-                        saveRefreshToken(result["refresh_token"].toString())
-                    }
-
-                    startActivity(
-                        Intent(this@LoginActivity, MainActivity::class.java).apply {
-                            setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    )
-                    finish()
-                } catch (e: HttpException) {
-                    e.printStackTrace()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-            }
-
+            login()
         }
 
         binding.register.setOnClickListener {
@@ -94,6 +48,54 @@ class LoginActivity : AppCompatActivity() {
            lifecycleScope.launch {
                TokenProviderImpl(this@LoginActivity).clearTokens()
            }
+        }
+    }
+
+    private fun login() {
+        if (
+            binding.textInputEditText.text.isNullOrEmpty() ||
+            !isValidEmail(binding.textInputEditText.text.toString())
+        ) {
+            binding.textInputEditText.error = "Invalid input!"
+            return
+        }
+
+        if (binding.textInputEditText2.text.isNullOrEmpty()) {
+            binding.textInputEditText2.error = "Invalid input!"
+            return
+        }
+
+        val api = RetrofitProvider
+            .createRetrofit(TokenProviderImpl(this))
+            .create(AuthApi::class.java)
+
+        val input = LoginUserData(
+            binding.textInputEditText.text.toString(),
+            binding.textInputEditText2.text.toString()
+        )
+
+        lifecycleScope.launch {
+            try {
+                val result = api.login(input)
+
+                Log.d("MYTEST", "$result")
+
+                TokenProviderImpl(this@LoginActivity).apply {
+                    saveAccessToken(result["access_token"].toString())
+                    saveRefreshToken(result["refresh_token"].toString())
+                }
+
+                startActivity(
+                    Intent(this@LoginActivity, MainActivity::class.java).apply {
+                        setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+                finish()
+            } catch (e: HttpException) {
+                e.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

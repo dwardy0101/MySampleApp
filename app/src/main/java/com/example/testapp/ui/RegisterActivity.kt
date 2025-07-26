@@ -32,53 +32,55 @@ class RegisterActivity : AppCompatActivity() {
             insets
         }
 
-
         binding.create.setOnClickListener {
+            signUp()
+        }
+    }
 
-            if (binding.textInputEditText.text.isNullOrEmpty()) {
-                binding.textInputEditText.error = "Invalid input!"
-                return@setOnClickListener
+    private fun signUp() {
+        if (binding.textInputEditText.text.isNullOrEmpty()) {
+            binding.textInputEditText.error = "Invalid input!"
+            return
+        }
+
+        if (
+            binding.textInputEditText2.text.isNullOrEmpty() ||
+            !isValidEmail(binding.textInputEditText2.text.toString())
+        ) {
+            binding.textInputEditText2.error = "Invalid input!"
+            return
+        }
+
+        if (binding.textInputEditText3.text.isNullOrEmpty()) {
+            binding.textInputEditText3.error = "Invalid input!"
+            return
+        }
+
+        val api = RetrofitProvider
+            .createRetrofit(TokenProviderImpl(this))
+            .create(UserApi::class.java)
+
+        val input = CreateUserData(
+            binding.textInputEditText.text.toString(),
+            binding.textInputEditText2.text.toString(),
+            binding.textInputEditText3.text.toString()
+        )
+
+        lifecycleScope.launch {
+            try {
+                val response = api.createUser(input)
+                Log.d("MYTEST", "$response")
+
+                if (response.isJsonNull) {
+                    Toast.makeText(this@RegisterActivity, "Registration Failed!", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@RegisterActivity, "Registration Successful!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
 
-            if (
-                binding.textInputEditText2.text.isNullOrEmpty() ||
-                !isValidEmail(binding.textInputEditText2.text.toString())
-            ) {
-                binding.textInputEditText2.error = "Invalid input!"
-                return@setOnClickListener
-            }
-
-            if (binding.textInputEditText3.text.isNullOrEmpty()) {
-                binding.textInputEditText3.error = "Invalid input!"
-                return@setOnClickListener
-            }
-
-            val api = RetrofitProvider
-                .createRetrofit(TokenProviderImpl(this))
-                .create(UserApi::class.java)
-
-            val input = CreateUserData(
-                binding.textInputEditText.text.toString(),
-                binding.textInputEditText2.text.toString(),
-                binding.textInputEditText3.text.toString()
-            )
-
-            lifecycleScope.launch {
-               try {
-                   val response = api.createUser(input)
-                   Log.d("MYTEST", "$response")
-
-                   if (response.isJsonNull) {
-                       Toast.makeText(this@RegisterActivity, "Registration Failed!", Toast.LENGTH_LONG).show()
-                   } else {
-                       Toast.makeText(this@RegisterActivity, "Registration Successful!", Toast.LENGTH_LONG).show()
-                       finish()
-                   }
-               } catch (e: Exception) {
-                   e.printStackTrace()
-               }
-
-            }
         }
     }
 
