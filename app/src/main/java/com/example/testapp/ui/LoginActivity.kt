@@ -16,6 +16,7 @@ import com.example.testapp.data.model.LoginUserData
 import com.example.testapp.data.persistent.TokenProviderImpl
 import com.example.testapp.databinding.ActivityLoginBinding
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class LoginActivity : AppCompatActivity() {
 
@@ -59,21 +60,28 @@ class LoginActivity : AppCompatActivity() {
             )
 
             lifecycleScope.launch {
-                val result = api.login(input)
+                try {
+                    val result = api.login(input)
 
-                Log.d("MYTEST", "$result")
+                    Log.d("MYTEST", "$result")
 
-                TokenProviderImpl(this@LoginActivity).apply {
-                    saveAccessToken(result["access_token"].toString())
-                    saveRefreshToken(result["refresh_token"].toString())
+                    TokenProviderImpl(this@LoginActivity).apply {
+                        saveAccessToken(result["access_token"].toString())
+                        saveRefreshToken(result["refresh_token"].toString())
+                    }
+
+                    startActivity(
+                        Intent(this@LoginActivity, MainActivity::class.java).apply {
+                            setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    )
+                    finish()
+                } catch (e: HttpException) {
+                    e.printStackTrace()
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
 
-                startActivity(
-                    Intent(this@LoginActivity, MainActivity::class.java).apply {
-                        setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                )
-                finish()
             }
 
         }
@@ -89,7 +97,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun isValidEmail(email: String): Boolean {
+    private fun isValidEmail(email: String): Boolean {
         val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
         return emailRegex.matches(email)
     }

@@ -5,6 +5,7 @@ import com.example.testapp.data.persistent.TokenProvider
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
+import retrofit2.HttpException
 
 class AuthInterceptor(
     private val tokenProvider: TokenProvider,
@@ -42,15 +43,32 @@ class AuthInterceptor(
             try {
                 val refreshResponse = api.refreshToken(mapOf("refreshToken" to refreshToken))
 
-                refreshResponse["access_token"] ?: return@runBlocking null
+                if (
+                    refreshResponse["access_token"].isJsonNull ||
+                    refreshResponse["refresh_token"].isJsonNull
+                ) {
+                    return@runBlocking null
+                }
 
                 val newToken = refreshResponse["access_token"].toString()
                 tokenProvider.saveAccessToken(newToken)
 
+                val newRefreshToken = refreshResponse["refresh_token"].toString()
+                tokenProvider.saveRefreshToken(newRefreshToken)
+
                 return@runBlocking newToken
 
-            } catch (e : Exception) {
+            } catch (e: HttpException) {
                 e.printStackTrace()
+
+                if (e.code() == 401 || e.code() == 403) {
+                    tokenProvider.clearTokens()
+                }
+                return@runBlocking null
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@runBlocking null
             }
         }
 
