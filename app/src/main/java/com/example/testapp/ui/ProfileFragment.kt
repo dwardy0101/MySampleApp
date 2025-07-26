@@ -56,6 +56,16 @@ class ProfileFragment : Fragment() {
             try {
                 val result = api.getProfile()
                 Log.d("MYTEST", "$result")
+
+                UserManager.createUser(result)
+
+                val user = UserManager.user!!
+                binding.userId.text = user.id.toString()
+                binding.userEmail.text = user.email
+                binding.userName.text = user.name
+                binding.userRole.text = user.role
+                binding.userAvatar.text = user.avatar
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }

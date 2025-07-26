@@ -3,18 +3,18 @@ package com.example.testapp.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.testapp.MainActivity
-import com.example.testapp.Network
 import com.example.testapp.data.RetrofitProvider
 import com.example.testapp.data.api.AuthApi
 import com.example.testapp.data.model.LoginUserData
 import com.example.testapp.data.persistent.TokenProviderImpl
 import com.example.testapp.databinding.ActivityLoginBinding
+import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -36,18 +36,24 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
-        binding.login.setOnClickListener {
-            login()
-        }
+        binding.login.setOnClickListener(onClick)
+        binding.register.setOnClickListener(onClick)
+        binding.reset.setOnClickListener(onClick)
+    }
 
-        binding.register.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
-        }
-
-        binding.reset.setOnClickListener {
-           lifecycleScope.launch {
-               TokenProviderImpl(this@LoginActivity).clearTokens()
-           }
+    private val onClick = View.OnClickListener {
+        when(it) {
+            binding.login -> {
+                login()
+            }
+            binding.register -> {
+                startActivity(Intent(this, RegisterActivity::class.java))
+            }
+            binding.reset -> {
+                lifecycleScope.launch {
+                    TokenProviderImpl(this@LoginActivity).clearTokens()
+                }
+            }
         }
     }
 
@@ -76,13 +82,13 @@ class LoginActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val result = api.login(input)
+                val result: JsonObject = api.login(input)
 
                 Log.d("MYTEST", "$result")
 
                 TokenProviderImpl(this@LoginActivity).apply {
-                    saveAccessToken(result["access_token"].toString())
-                    saveRefreshToken(result["refresh_token"].toString())
+                    saveAccessToken(result["access_token"].asString)
+                    saveRefreshToken(result["refresh_token"].asString)
                 }
 
                 startActivity(

@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,8 +10,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.testapp.data.persistent.TokenProviderImpl
 import com.example.testapp.databinding.ActivityMainBinding
-import com.example.testapp.ui.LoginActivity
-import com.example.testapp.ui.PagerAdapter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {

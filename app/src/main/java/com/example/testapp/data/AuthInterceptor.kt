@@ -42,19 +42,21 @@ class AuthInterceptor(
             return response
         }
 
-        response.close() // important: close old response
+        response.close()
 
-        // Try to refresh token
+        // 401 case
         val newAccessToken = runBlocking {
             val refreshToken = tokenProvider.getRefreshToken() ?: return@runBlocking null
 
             try {
+                // request new token
                 val refreshResponse = api.refreshToken(mapOf("refreshToken" to refreshToken))
 
                 if (
                     refreshResponse["access_token"].isJsonNull ||
                     refreshResponse["refresh_token"].isJsonNull
                 ) {
+                    tokenProvider.clearTokens()
                     return@runBlocking null
                 }
 
@@ -68,14 +70,12 @@ class AuthInterceptor(
 
             } catch (e: HttpException) {
                 e.printStackTrace()
-
-                if (e.code() == 401 || e.code() == 403) {
-                    tokenProvider.clearTokens()
-                }
+                tokenProvider.clearTokens()
                 return@runBlocking null
 
             } catch (e: Exception) {
                 e.printStackTrace()
+                tokenProvider.clearTokens()
                 return@runBlocking null
             }
         }
