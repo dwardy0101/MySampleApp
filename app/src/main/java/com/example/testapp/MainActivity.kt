@@ -11,15 +11,18 @@ import androidx.lifecycle.lifecycleScope
 import com.example.testapp.data.persistent.TokenProviderImpl
 import com.example.testapp.databinding.ActivityMainBinding
 import com.example.testapp.ui.LoginActivity
+import com.example.testapp.ui.PagerAdapter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
         lifecycleScope.launch {
             val tokenProvider = TokenProviderImpl(this@MainActivity)
@@ -38,6 +41,8 @@ class MainActivity : AppCompatActivity() {
                     v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
                     insets
                 }
+
+                initView()
             }
         }
 
@@ -47,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(view)
 
-        binding.reset.setOnClickListener {
+        binding.logout.setOnClickListener {
             lifecycleScope.launch {
                 TokenProviderImpl(this@MainActivity).apply {
                     clearTokens()
@@ -61,5 +66,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun initView() {
+        val adapter = PagerAdapter(supportFragmentManager)
+        binding.pager.adapter = adapter
     }
 }
