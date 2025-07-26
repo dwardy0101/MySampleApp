@@ -3,6 +3,7 @@ package com.example.testapp.data.api
 import com.example.testapp.data.model.LoginUserData
 import com.google.gson.JsonObject
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthApi {
@@ -11,4 +12,7 @@ interface AuthApi {
 
     @POST("auth/refresh-token")
     suspend fun refreshToken(@Body body: Map<String, String>): JsonObject
+
+    @GET("auth/profile")
+    suspend fun getProfile(): JsonObject
 }

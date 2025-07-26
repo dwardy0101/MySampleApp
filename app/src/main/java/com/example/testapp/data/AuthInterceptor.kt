@@ -1,5 +1,6 @@
 package com.example.testapp.data
 
+import android.util.Log
 import com.example.testapp.data.api.AuthApi
 import com.example.testapp.data.persistent.TokenProvider
 import kotlinx.coroutines.runBlocking
@@ -14,6 +15,13 @@ class AuthInterceptor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
+
+        Log.d("MYTEST", "REQ-URL: ${originalRequest.url}")
+
+        if (originalRequest.url.encodedPath.endsWith("/auth/login") ||
+            originalRequest.url.encodedPath.endsWith("/auth/refresh-token")) {
+            return chain.proceed(originalRequest)
+        }
 
         // Get current token synchronously
         val accessToken = runBlocking {
